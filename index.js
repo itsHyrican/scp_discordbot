@@ -34,6 +34,11 @@ const servers = [
     serverIp: "ark.voltagex.de",
   },
   {
+    displayName: "ASA: Aquatica",
+    containerName: "asa_extinction",
+    serverIp: "ark.voltagex.de",
+  },
+  {
     containerName: "craftopia",
     displayName: "Craftopia",
     serverIp: "craftopia.voltagex.de",
