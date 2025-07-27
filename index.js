@@ -156,7 +156,7 @@ client.once("ready", async () => {
   await updateStatus();
 
   // Wiederholen alle 10 Sekunden
-  setInterval(updateStatus, 10 * 1000);
+  setInterval(updateStatus, 30 * 1000);
 });
 
 client.login(process.env.DISCORD_TOKEN);
