@@ -130,7 +130,7 @@ client.once("ready", async () => {
     } else {
       statusMessage = await channel.send({ embeds: [embed] });
       await fs.writeFile("lastMessageId.txt", statusMessage.id, "utf-8");
-      console.log("💾 Nachricht-ID gespeichert.");
+      console.log("💾 Nachricht-ID gespeichert..");
     }
   };
 
