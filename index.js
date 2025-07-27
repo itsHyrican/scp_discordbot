@@ -91,7 +91,7 @@ client.once("ready", async () => {
   }
 
   const updateStatus = async () => {
-    const statusLines = [];
+    const fields = [];
 
     for (const server of servers) {
       try {
@@ -100,23 +100,29 @@ client.once("ready", async () => {
         );
         const isOnline = res.data?.state === "running";
 
-        statusLines.push(
-          `**${server.displayName}** (${server.serverIp}): ${
-            isOnline ? "🟢 Online" : "🔴 Offline"
-          }`
-        );
+        fields.push({
+          name: `🖥️ ${server.displayName}`,
+          value: `IP: \`${server.serverIp}\`\nStatus: ${
+            isOnline ? "🟢 **Online**" : "🔴 **Offline**"
+          }`,
+          inline: true,
+        });
       } catch (err) {
         console.error(`❌ Fehler bei ${server.containerName}:`, err.message);
-        statusLines.push(
-          `**${server.displayName}** (${server.serverIp}): ⚠️ Fehler`
-        );
+        fields.push({
+          name: `🖥️ ${server.displayName}`,
+          value: `IP: \`${server.serverIp}\`\nStatus: ⚠️ **Fehler**`,
+          inline: true,
+        });
       }
     }
 
     const embed = new EmbedBuilder()
-      .setTitle("🖥️ Serverstatus")
-      .setDescription(statusLines.join("\n"))
-      .setColor(0x0099ff)
+      .setTitle("🎮 Serverstatus Übersicht")
+      .setDescription("Aktuelle Übersicht aller Server")
+      .addFields(fields)
+      .setColor(0x00bfff) // z. B. Blau
+      .setFooter({ text: "Letztes Update" })
       .setTimestamp();
 
     if (statusMessage) {
