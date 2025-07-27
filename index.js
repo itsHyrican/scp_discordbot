@@ -96,7 +96,7 @@ client.once("ready", async () => {
     for (const server of servers) {
       try {
         const res = await axios.get(
-          `http://localhost:3001/api/server/status/${server.containerName}`
+          `http://127.0.0.1:3001/api/server/status/${server.containerName}`
         );
         const isOnline = res.data?.online ?? false;
 
