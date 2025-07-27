@@ -96,9 +96,9 @@ client.once("ready", async () => {
     for (const server of servers) {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:3001/api/server/status/${server.containerName}`
+          `${process.env.API_BASE_URL}/server/status/${server.containerName}`
         );
-        const isOnline = res.data?.online ?? false;
+        const isOnline = res.data?.state === "running";
 
         statusLines.push(
           `**${server.displayName}** (${server.serverIp}): ${
