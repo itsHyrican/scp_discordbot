@@ -90,38 +90,51 @@ client.once("ready", async () => {
     );
   }
 
+  const lastKnownStates = new Map();
+
   const updateStatus = async () => {
     const fields = [];
 
     for (const server of servers) {
+      let isOnline = false;
+
       try {
         const res = await axios.get(
           `${process.env.API_BASE_URL}/server/status/${server.containerName}`
         );
-        const isOnline = res.data?.state === "running";
-
-        fields.push({
-          name: `🖥️ ${server.displayName}`,
-          value: `IP: \`${server.serverIp}\`\nStatus: ${
-            isOnline ? "🟢 **Online**" : "🔴 **Offline**"
-          }`,
-          inline: true,
-        });
+        isOnline = res.data?.state === "running";
       } catch (err) {
         console.error(`❌ Fehler bei ${server.containerName}:`, err.message);
-        fields.push({
-          name: `🖥️ ${server.displayName}`,
-          value: `IP: \`${server.serverIp}\`\nStatus: ⚠️ **Fehler**`,
-          inline: true,
-        });
       }
+
+      // Vergleiche mit vorherigem Zustand
+      const previousState = lastKnownStates.get(server.containerName);
+
+      if (previousState !== undefined && previousState !== isOnline) {
+        // Statusänderung erkannt → Nachricht senden
+        const alertMsg = isOnline
+          ? `✅ **${server.displayName}** ist jetzt online!`
+          : `❌ **${server.displayName}** ist offline gegangen!`;
+
+        await channel.send(alertMsg);
+      }
+
+      // Update speichern
+      lastKnownStates.set(server.containerName, isOnline);
+
+      // Feld für Embed aufbauen
+      fields.push({
+        name: `🖥️ ${server.displayName}`,
+        value: `${isOnline ? "🟢 **Online**" : "🔴 **Offline**"}`,
+        inline: true,
+      });
     }
 
     const embed = new EmbedBuilder()
       .setTitle("🎮 Serverstatus Übersicht")
-      .setDescription("Aktuelle Übersicht aller Server")
+      .setDescription("Letzter bekannter Status aller Server")
       .addFields(fields)
-      .setColor(0x00bfff) // z. B. Blau
+      .setColor(0x00bfff)
       .setFooter({ text: "Letztes Update" })
       .setTimestamp();
 
@@ -130,7 +143,7 @@ client.once("ready", async () => {
     } else {
       statusMessage = await channel.send({ embeds: [embed] });
       await fs.writeFile("lastMessageId.txt", statusMessage.id, "utf-8");
-      console.log("💾 Nachricht-ID gespeichert..");
+      console.log("💾 Nachricht-ID gespeichert.");
     }
   };
 
