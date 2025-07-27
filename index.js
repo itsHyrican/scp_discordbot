@@ -1,12 +1,12 @@
 require("dotenv").config();
 const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
+const fs = require("fs/promises");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-// Deine Servers aus Frontend (vereinfacht hier)
 const servers = [
   {
     displayName: "ASA: The Island",
@@ -76,7 +76,21 @@ client.once("ready", async () => {
     return;
   }
 
-  const fetchAndUpdateStatus = async () => {
+  // 🧠 Versuche, alte Nachricht-ID aus Datei zu laden
+  try {
+    const lastId = await fs.readFile("lastMessageId.txt", "utf-8");
+    const msg = await channel.messages.fetch(lastId);
+    if (msg && msg.author.id === client.user.id) {
+      statusMessage = msg;
+      console.log("🔁 Vorherige Nachricht wiederverwendet.");
+    }
+  } catch (err) {
+    console.log(
+      "ℹ️ Keine alte Nachricht gefunden oder konnte sie nicht laden."
+    );
+  }
+
+  const updateStatus = async () => {
     const statusLines = [];
 
     for (const server of servers) {
@@ -109,11 +123,16 @@ client.once("ready", async () => {
       await statusMessage.edit({ embeds: [embed] });
     } else {
       statusMessage = await channel.send({ embeds: [embed] });
+      await fs.writeFile("lastMessageId.txt", statusMessage.id, "utf-8");
+      console.log("💾 Nachricht-ID gespeichert.");
     }
   };
 
-  await fetchAndUpdateStatus();
-  setInterval(fetchAndUpdateStatus, 10 * 1000); // Alle 10 Sekunden
+  // Erste Ausführung
+  await updateStatus();
+
+  // Wiederholen alle 10 Sekunden
+  setInterval(updateStatus, 10 * 1000);
 });
 
 client.login(process.env.DISCORD_TOKEN);
