@@ -39,6 +39,11 @@ const servers = [
     serverIp: "ark.voltagex.de",
   },
   {
+    displayName: "7 Days To Die",
+    containerName: "7dtd",
+    serverIp: "7dtd.voltagex.de",
+  },
+  {
     containerName: "craftopia",
     displayName: "Craftopia",
     serverIp: "craftopia.voltagex.de",
